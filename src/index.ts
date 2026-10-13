@@ -186,10 +186,80 @@ function renderizarTodo(): void {
     actualizarMensajes();
     actualizarPaneles();
 }
-// --- TEMPORAL: se borra en el Paso 11 ---
-function alHacerClicEnCaja(numero: number): void {
-    console.log("Hiciste clic en la caja", numero);
+function obtenerCajaJugador(): Caja {
+    const caja = partida.cajas.find(c => c.numero === partida.cajaJugador);
+    if (caja === undefined) {
+        throw new Error("El jugador todavía no eligió su caja.");
+    }
+    return caja;
 }
 
+function calcularOferta(): number {
+    const disponibles = premiosEnJuego();
+    const suma = disponibles.reduce((total, premio) => total + premio, 0);
+    const promedio = suma / disponibles.length;
+    const factor = 0.25 + partida.ronda * 0.1; // la oferta mejora ronda a ronda
+    const oferta = promedio * factor;
+    return oferta >= 1000 ? Math.round(oferta / 100) * 100 : Math.max(1, Math.round(oferta));
+}
+
+function alHacerClicEnCaja(numero: number): void {
+    const caja = partida.cajas.find(c => c.numero === numero);
+    if (caja === undefined) return;
+
+    if (partida.estado === "eligiendo-caja") {
+        partida.cajaJugador = numero;
+        partida.estado = "abriendo-cajas";
+    } else if (partida.estado === "abriendo-cajas") {
+        if (caja.abierta || numero === partida.cajaJugador) return;
+        caja.abierta = true;
+        partida.abiertasEnRonda++;
+        if (partida.abiertasEnRonda === CAJAS_POR_RONDA[partida.ronda]) {
+            partida.estado = "oferta";
+            partida.oferta = calcularOferta();
+        }
+    } else {
+        return;
+    }
+    renderizarTodo();
+}
+
+function aceptarTrato(): void {
+    const cajaPropia = obtenerCajaJugador();
+    cajaPropia.abierta = true;
+    partida.estado = "terminada";
+
+    const oferta = formatearDinero(partida.oferta);
+    const contenido = formatearDinero(cajaPropia.premio);
+    if (cajaPropia.premio > partida.oferta) {
+        partida.resultado = `Aceptaste ${oferta}. Tu caja tenía ${contenido}: esta vez ganó el banquero.`;
+    } else {
+        partida.resultado = `Aceptaste ${oferta}. Tu caja tenía ${contenido}: ¡le ganaste al banquero!`;
+    }
+    renderizarTodo();
+}
+
+function rechazarTrato(): void {
+    partida.ronda++;
+    partida.abiertasEnRonda = 0;
+
+    if (partida.ronda >= CAJAS_POR_RONDA.length) {
+        const cajaPropia = obtenerCajaJugador();
+        cajaPropia.abierta = true;
+        partida.estado = "terminada";
+        partida.resultado =
+            `Rechazaste todas las ofertas y abriste tu caja: ganaste ${formatearDinero(cajaPropia.premio)}.`;
+    } else {
+        partida.estado = "abriendo-cajas";
+    }
+    renderizarTodo();
+}
+
+botonTrato.addEventListener("click", aceptarTrato);
+botonNoTrato.addEventListener("click", rechazarTrato);
+botonNuevaPartida.addEventListener("click", () => {
+    partida = crearPartida();
+    renderizarTodo();
+});
+
 renderizarTodo();
-// --- FIN TEMPORAL ---
