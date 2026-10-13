@@ -60,4 +60,136 @@ function crearPartida(): Partida {
 }
 
 let partida: Partida = crearPartida();
-console.log(partida);
+function obtener<T extends HTMLElement>(selector: string): T {
+    const elemento = document.querySelector<T>(selector);
+    if (elemento === null) {
+        throw new Error("No se encontró el elemento " + selector);
+    }
+    return elemento;
+}
+
+const tablero = obtener<HTMLDivElement>("#tablero");
+const listaMenores = obtener<HTMLUListElement>("#premios-menores");
+const listaMayores = obtener<HTMLUListElement>("#premios-mayores");
+const mensajeJuego = obtener<HTMLParagraphElement>("#mensaje-juego");
+const infoRonda = obtener<HTMLParagraphElement>("#info-ronda");
+const panelBanquero = obtener<HTMLElement>("#banquero");
+const ofertaMonto = obtener<HTMLParagraphElement>("#oferta-monto");
+const panelResultado = obtener<HTMLElement>("#resultado");
+const resultadoTexto = obtener<HTMLParagraphElement>("#resultado-texto");
+const botonTrato = obtener<HTMLButtonElement>("#boton-trato");
+const botonNoTrato = obtener<HTMLButtonElement>("#boton-no-trato");
+const botonNuevaPartida = obtener<HTMLButtonElement>("#boton-nueva-partida");
+
+function formatearDinero(valor: number): string {
+    return "$" + valor.toLocaleString("es-AR");
+}
+
+function premiosEnJuego(): number[] {
+    return partida.cajas
+        .filter(caja => !caja.abierta)
+        .map(caja => caja.premio);
+}
+
+function premiosEliminados(): number[] {
+    return partida.cajas
+        .filter(caja => caja.abierta)
+        .map(caja => caja.premio);
+}
+
+function renderizarTablero(): void {
+    tablero.replaceChildren();
+
+    for (const caja of partida.cajas) {
+        const { numero, premio, abierta } = caja;
+        const esDelJugador = numero === partida.cajaJugador;
+
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "caja";
+        if (esDelJugador) boton.classList.add("jugador");
+        if (abierta) boton.classList.add("abierta");
+
+        const etiqueta = document.createElement("span");
+        etiqueta.textContent = String(numero);
+        boton.append(etiqueta);
+
+        if (abierta) {
+            const detalle = document.createElement("small");
+            detalle.textContent = formatearDinero(premio);
+            boton.append(detalle);
+        } else if (esDelJugador) {
+            const detalle = document.createElement("small");
+            detalle.textContent = "TU CAJA";
+            boton.append(detalle);
+        }
+
+        const juegoActivo =
+            partida.estado === "eligiendo-caja" || partida.estado === "abriendo-cajas";
+        boton.disabled = !(juegoActivo && !abierta && !esDelJugador);
+
+        boton.addEventListener("click", () => alHacerClicEnCaja(numero));
+        tablero.append(boton);
+    }
+}
+
+function renderizarPremios(): void {
+    listaMenores.replaceChildren();
+    listaMayores.replaceChildren();
+
+    const eliminados = premiosEliminados();
+    const ordenados = [...PREMIOS].sort((a, b) => a - b);
+    const mitad = ordenados.length / 2;
+
+    ordenados.forEach((premio, indice) => {
+        const item = document.createElement("li");
+        item.textContent = formatearDinero(premio);
+        if (eliminados.includes(premio)) {
+            item.classList.add("eliminado");
+        }
+        if (indice < mitad) {
+            listaMenores.append(item);
+        } else {
+            listaMayores.append(item);
+        }
+    });
+}
+
+function actualizarMensajes(): void {
+    if (partida.estado === "eligiendo-caja") {
+        mensajeJuego.textContent = "Elegí tu caja. Es la que te quedás si no aceptás ningún trato.";
+        infoRonda.textContent = "";
+    } else if (partida.estado === "abriendo-cajas") {
+        const faltan = CAJAS_POR_RONDA[partida.ronda] - partida.abiertasEnRonda;
+        mensajeJuego.textContent =
+            `Tu caja es la número ${partida.cajaJugador}. Abrí ${faltan} ${faltan === 1 ? "caja más" : "cajas más"}.`;
+        infoRonda.textContent = `Ronda ${partida.ronda + 1} de ${CAJAS_POR_RONDA.length}`;
+    } else if (partida.estado === "oferta") {
+        mensajeJuego.textContent = "¡Llama el banquero! ¿Trato o no trato?";
+        infoRonda.textContent = `Ronda ${partida.ronda + 1} de ${CAJAS_POR_RONDA.length}`;
+    } else {
+        mensajeJuego.textContent = "Fin de la partida.";
+        infoRonda.textContent = "";
+    }
+}
+
+function actualizarPaneles(): void {
+    panelBanquero.hidden = partida.estado !== "oferta";
+    ofertaMonto.textContent = formatearDinero(partida.oferta);
+    panelResultado.hidden = partida.estado !== "terminada";
+    resultadoTexto.textContent = partida.resultado;
+}
+
+function renderizarTodo(): void {
+    renderizarTablero();
+    renderizarPremios();
+    actualizarMensajes();
+    actualizarPaneles();
+}
+// --- TEMPORAL: se borra en el Paso 11 ---
+function alHacerClicEnCaja(numero: number): void {
+    console.log("Hiciste clic en la caja", numero);
+}
+
+renderizarTodo();
+// --- FIN TEMPORAL ---
