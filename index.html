@@ -2,13 +2,57 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trato Hecho</title>
   <link rel="stylesheet" href="estilos.css">
   <script src="dist/index.js" defer></script>
 </head>
 <body>
-  <h1>Trato Hecho</h1>
-  <button id="boton-prueba" type="button">Probar conexión</button>
-  <p id="mensaje-prueba"></p>
+  <header>
+    <h1>TRATO HECHO</h1>
+    <p class="subtitulo">¿Aceptás el trato del banquero o seguís jugando?</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <p id="mensaje-juego"></p>
+      <p id="info-ronda"></p>
+    </section>
+
+    <div class="zona-juego">
+      <section class="panel">
+        <h2>Cajas</h2>
+        <div id="tablero"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Premios</h2>
+        <div class="columnas-premios">
+          <ul id="premios-menores"></ul>
+          <ul id="premios-mayores"></ul>
+        </div>
+      </section>
+    </div>
+
+    <section id="banquero" class="panel" hidden>
+      <h2>El banquero te ofrece</h2>
+      <p id="oferta-monto"></p>
+      <div class="botones">
+        <button id="boton-trato" type="button">TRATO</button>
+        <button id="boton-no-trato" type="button">NO TRATO</button>
+      </div>
+    </section>
+
+    <section id="resultado" class="panel" hidden>
+      <p id="resultado-texto"></p>
+    </section>
+
+    <button id="boton-nueva-partida" type="button">Nueva partida</button>
+  </main>
+
+  <footer>
+    <button id="boton-prueba" type="button">Probar conexión</button>
+    <p id="mensaje-prueba"></p>
+  </footer>
 </body>
 </html>
