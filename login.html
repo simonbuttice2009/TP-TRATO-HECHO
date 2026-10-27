@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trato Hecho - Ingresar</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script src="dist/login.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>TRATO HECHO</h1>
+    <p class="subtitulo">Ingresá o creá tu cuenta para jugar</p>
+  </header>
+
+  <main>
+    <!-- BLOQUE: formulario de inicio de sesión -->
+    <section class="panel">
+      <h2>Iniciar sesión</h2>
+      <form id="form-login">
+        <label for="login-nombre">Usuario</label>
+        <input type="text" id="login-nombre" name="nombre" required>
+
+        <label for="login-contrasena">Contraseña</label>
+        <input type="password" id="login-contrasena" name="contrasena" required>
+
+        <button type="submit">Entrar</button>
+      </form>
+    </section>
+
+    <!-- BLOQUE: formulario de registro -->
+    <section class="panel">
+      <h2>Crear cuenta</h2>
+      <form id="form-registro">
+        <label for="registro-nombre">Usuario (3 a 30 caracteres)</label>
+        <input type="text" id="registro-nombre" name="nombre" minlength="3" maxlength="30" required>
+
+        <label for="registro-contrasena">Contraseña (mínimo 4 caracteres)</label>
+        <input type="password" id="registro-contrasena" name="contrasena" minlength="4" required>
+
+        <button type="submit">Crear cuenta</button>
+      </form>
+    </section>
+
+    <!-- BLOQUE: acá se muestran los errores -->
+    <p id="mensaje-login"></p>
+  </main>
+</body>
+</html>

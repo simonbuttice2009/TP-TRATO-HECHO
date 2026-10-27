@@ -81,6 +81,18 @@ const botonTrato = obtener<HTMLButtonElement>("#boton-trato");
 const botonNoTrato = obtener<HTMLButtonElement>("#boton-no-trato");
 const botonNuevaPartida = obtener<HTMLButtonElement>("#boton-nueva-partida");
 
+// ============================================================
+// BLOQUE NUEVO: Elementos de la barra de usuario y tipo de respuesta de sesion.php
+// ============================================================
+const nombreUsuario = obtener<HTMLElement>("#nombre-usuario");
+const botonRanking = obtener<HTMLButtonElement>("#boton-ranking");
+const botonCerrarSesion = obtener<HTMLButtonElement>("#boton-cerrar-sesion");
+
+interface RespuestaSesion {
+    logueado: boolean;
+    nombre?: string;
+}
+
 function formatearDinero(valor: number): string {
     return "$" + valor.toLocaleString("es-AR");
 }
@@ -223,7 +235,41 @@ function alHacerClicEnCaja(numero: number): void {
     }
     renderizarTodo();
 }
+// ============================================================
+// BLOQUE NUEVO: Verificar que haya una sesión iniciada
+// Si no la hay, manda al login. Si la hay, muestra el nombre.
+// ============================================================
+async function verificarSesion(): Promise<void> {
+    try {
+        const respuesta = await fetch("/api/sesion");
+        const datos: RespuestaSesion = await respuesta.json();
 
+        if (datos.logueado) {
+            nombreUsuario.textContent = datos.nombre ?? "";
+        } else {
+            window.location.href = "/login.html";
+        }
+    } catch (error) {
+        mensajeJuego.textContent = "No se pudo conectar con el servidor. ¿Está corriendo node build/index.js?";
+    }
+}
+
+// ============================================================
+// BLOQUE NUEVO: Mandar el puntaje de la partida terminada al servidor
+// ============================================================
+async function guardarPuntaje(puntaje: number): Promise<void> {
+    try {
+        const respuesta = await fetch("/api/puntaje", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ puntaje })
+        });
+        if (!respuesta.ok) throw new Error("El servidor rechazó el puntaje.");
+    } catch (error) {
+        console.error("No se pudo guardar el puntaje:", error);
+        resultadoTexto.textContent += " (No se pudo guardar tu puntaje.)";
+    }
+}
 function aceptarTrato(): void {
     const cajaPropia = obtenerCajaJugador();
     cajaPropia.abierta = true;
@@ -237,6 +283,7 @@ function aceptarTrato(): void {
         partida.resultado = `Aceptaste ${oferta}. Tu caja tenía ${contenido}: ¡le ganaste al banquero!`;
     }
     renderizarTodo();
+    guardarPuntaje(partida.oferta);  
 }
 
 function rechazarTrato(): void {
@@ -249,6 +296,7 @@ function rechazarTrato(): void {
         partida.estado = "terminada";
         partida.resultado =
             `Rechazaste todas las ofertas y abriste tu caja: ganaste ${formatearDinero(cajaPropia.premio)}.`;
+        guardarPuntaje(cajaPropia.premio);   
     } else {
         partida.estado = "abriendo-cajas";
     }
@@ -261,5 +309,17 @@ botonNuevaPartida.addEventListener("click", () => {
     partida = crearPartida();
     renderizarTodo();
 });
+// ============================================================
+// BLOQUE NUEVO: Botones de la barra de usuario y chequeo de sesión
+// ============================================================
+botonRanking.addEventListener("click", () => {
+    window.location.href = "/ranking.html";
+});
 
+botonCerrarSesion.addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST" });
+    window.location.href = "/login.html";
+});
+
+verificarSesion();
 renderizarTodo();

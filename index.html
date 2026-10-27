@@ -8,9 +8,16 @@
   <script src="dist/index.js" defer></script>
 </head>
 <body>
-  <header>
+    <header>
     <h1>TRATO HECHO</h1>
     <p class="subtitulo">¿Aceptás el trato del banquero o seguís jugando?</p>
+
+    <!-- NUEVO: barra con el nombre del jugador, el ranking y cerrar sesión -->
+    <div id="barra-usuario">
+      <p>Jugador: <strong id="nombre-usuario"></strong></p>
+      <button id="boton-ranking" type="button">Ranking</button>
+      <button id="boton-cerrar-sesion" type="button">Cerrar sesión</button>
+    </div>
   </header>
 
   <main>

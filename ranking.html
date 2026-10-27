@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trato Hecho - Ranking</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script src="dist/ranking.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>RANKING</h1>
+    <p class="subtitulo">Los 10 mejores jugadores</p>
+  </header>
+
+  <main>
+    <!-- BLOQUE: tabla del ranking (las filas las crea ranking.ts) -->
+    <section class="panel">
+      <table id="tabla-ranking">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jugador</th>
+            <th>Mejor puntaje</th>
+            <th>Partidas jugadas</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="mensaje-ranking"></p>
+    </section>
+
+    <button id="boton-volver" type="button">Volver al juego</button>
+  </main>
+</body>
+</html>
